@@ -242,6 +242,18 @@ def _update_jenkins_config():
     restart_on_change({JENKINS_CONFIG_FILE: ['jenkins']})
 
 
+def _get_jjb_cmd():
+    possible_commands = ['jenkins-job-builder', 'jenkins-jobs']
+    possible_commands = ['which %s 2>/dev/null' % command
+                         for command in possible_commands]
+    try:
+        return subprocess.check_output(' || '.join(possible_commands),
+                                       shell=True)
+    except:
+        log('Could not find any jenkins-job command', ERROR)
+        raise
+
+
 def _update_jenkins_jobs():
     if not write_jjb_config():
         log('Could not write jenkins-job-builder config, skipping '
@@ -252,18 +264,18 @@ def _update_jenkins_jobs():
             'skipping jenkins-jobs update (%s)' % JOBS_CONFIG_DIR, ERROR)
         return
 
-    hook = os.path.join(JOBS_CONFIG_DIR, 'update')
-    if not os.path.isfile(hook):
-        log('Could not find jobs-config update hook at expected location: %s' %
-            hook, ERROR)
-        return
-
     save_context()
     # inform hook where to find the context json dump
     os.environ['JJB_CHARM_CONTEXT'] = CHARM_CONTEXT_DUMP
     os.environ['JJB_JOBS_CONFIG_DIR'] = JOBS_CONFIG_DIR
-    log('Calling jenkins-job-builder repo update hook: %s.' % hook)
-    subprocess.check_call(hook)
+
+    hook = os.path.join(JOBS_CONFIG_DIR, 'update')
+    if not os.path.isfile(hook):
+        log('Could not find jobs-config update hook at expected location: ' +
+            "%s, continuing anyways." % hook, ERROR)
+    else:
+        log('Calling jenkins-job-builder repo update hook: %s.' % hook)
+        subprocess.check_call(hook)
 
     # call jenkins-jobs to actually update jenkins
     # TODO: Call 'jenkins-job test' to validate configs before updating?
@@ -273,7 +285,7 @@ def _update_jenkins_jobs():
     # because it comes after a restart, so needs time
     for attempt in range(MAX_RETRIES):
         try:
-            cmd = ['jenkins-job-builder', 'update', JOBS_CONFIG_DIR]
+            cmd = [_get_jjb_cmd(), 'update', JOBS_CONFIG_DIR]
             # Run as the CI_USER so the cache will be primed with the correct
             # permissions (rather than root:root).
             common.run_as_user(cmd=cmd, user=common.CI_USER)
@@ -288,6 +300,7 @@ def _update_jenkins_jobs():
         except Exception as e:
             log('Error updating jobs, check jjb settings and retry: %s' %
                 str(e), ERROR)
+            raise
         break
 
 

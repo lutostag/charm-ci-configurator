@@ -177,7 +177,7 @@ def install_ssh_keys():
 
     # ssh keys are used to branch from LP. install bazaar.launchpad.net's
     # host keys, as well.
-    lp_kh = os.path.join(charm_dir(), 'launchpad_host_keys')
+    lp_kh = os.path.join(charm_dir(), 'known_host_keys')
     if lp_kh:
         with open(os.path.join(ssh_dir, 'known_hosts'), 'w') as out:
             out.write(open(lp_kh).read())
