@@ -248,7 +248,7 @@ def _get_jjb_cmd():
                          for command in possible_commands]
     try:
         return subprocess.check_output(' || '.join(possible_commands),
-                                       shell=True)
+                                       shell=True).strip()
     except:
         log('Could not find any jenkins-job command', ERROR)
         raise
