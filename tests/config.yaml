@@ -1,0 +1,99 @@
+options:
+    jjb-install-source:
+        type: string
+        default: 'git://github.com/openstack-infra/jenkins-job-builder.git'
+        description: |
+            Installation source for jenkins-job-bulider.  Supported options:
+
+            distro (only supported on Ubuntu 13.10 and later)
+            git://github.com/openstack-infra/jenkins-job-builder.git or similar
+
+            Alternatively, you may run the 'make sourcedeps' target of the
+            Makefile to package required assets into the charm prior to deploying,
+            for environments where network access is restricted.  Any bundled
+            package will override any value set here.
+    config-repo:
+        type: string
+        description: |
+            Revision control repository url containing collection of yaml files
+            containing jenkins-job-builder configs. This may also be packaged
+            locally prior to deploying by running 'make configrepo' target of
+            the Makefile to pull from a specified repository.  Again, any
+            bundled assets will override any setting set here.  The contents of
+            this repository (or anything packaged with the charm) will end up
+            installed in/etc/jenkins-job-builder/job-configs/ on the service
+            unit.
+
+            Launchpad git branches should use the full URL; the 'lp:' prefix
+            will not be expanded.
+    config-repo-revision:
+        type: string
+        default: "trunk"
+        description: |
+            If config-repo specified, which revision to use.  Defaults to
+            "trunk", and is updated on during every config-changed hook.
+
+            ("trunk" will be interpreted as "origin/master" if config-repo-rcs is git)
+    config-repo-rcs:
+        type: string
+        default: "bzr"
+        description: |
+            The RCS system to use to fetch the config-repo.  Supported options:
+
+            bzr
+            git
+    lp-login:
+        type: string
+        default: ''
+        description: |
+            Launchpad login name of user branching bzr repo (required for
+            private branches).
+    ssh-privkey:
+        type: string
+        description: |
+            SSH private key for associated LP user.
+    ssh-pubkey:
+        type: string
+        description: |
+            SSH public key for associated LP user.
+    schedule-updates:
+        type: boolean
+        default: false
+        description: |
+            If configured to run from trunk of a remote repository, you may
+            optionally have the charm install a cronjob that will periodically
+            pull trunk and update Jenkins.
+    update-frequency:
+        type: string
+        default: ''
+        description: |
+            If schedule-updates is True, update-frequency sets the schedule on
+            which the cronjob updates the branch and pushes changes to Jenkins.
+    update-trigger:
+        type: string
+        default: ''
+        description: Used to force config-changed hook runs.
+    lp-credentials-file:
+        type: string
+        default: ''
+        description: |
+            Credentials for login into Launchpad to retrieve team membership.
+    lp-schedule:
+        type: string
+        default: "*/15 * * * *"
+        description: |
+            Cron-formatted schedule for launchpad sync
+    force-package-install:
+        type: boolean
+        default: false
+        description:
+            If set to true, packages listed in control.yml will be forced to install
+            with the --force-confnew and --force-confdef apt options
+    disable-strict-host-checking-hosts:
+        type: string
+        default: ''
+        description: |
+            Comma-separated list of hosts that should have strict host checking
+            disabled in the user that is configuring the charm; this is to
+            allow git cloning of jenkins-job-builder configuration over SSH
+            without interactivity.

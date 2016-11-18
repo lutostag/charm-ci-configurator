@@ -1,0 +1,5 @@
+[gerrit]
+host={{ host }}
+port={{ port }}
+project={{ repo }}
+

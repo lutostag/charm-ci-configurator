@@ -1,0 +1,20 @@
+name: ci-configurator
+summary: |
+    Subordinate charm used to configure an integrated Jenkins, Zuul and Gerrit
+    continious-integration pipeline.
+maintainer: "Greg Lutostanski <gregory.lutostanski@canonical.com>"
+description: ci-configurator
+subordinate: true
+series: ["xenial", "trusty"]
+requires:
+  jenkins-configurator:
+    interface: jenkins-extension
+    scope: container
+  gerrit-configurator:
+    interface: gerrit-configurator
+    scope: container
+  zuul-configurator:
+    interface: zuul-configurator
+    scope: container
+  vault:
+    interface: vault
