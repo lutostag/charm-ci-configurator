@@ -57,7 +57,7 @@ def install():
     if os.path.isfile(tarball):
         log('Installing jenkins-job-builder from bundled file: %s.' % tarball)
         install_from_file(tarball)
-    elif src.startswith('git://'):
+    elif src.startswith('git://') or src.startswith('https://'):
         log('Installing jenkins-job-builder from remote git: %s.' % src)
         install_from_git(src)
     elif src == 'distro':
