@@ -314,6 +314,17 @@ def update_jenkins():
              'skipping ***'))
         return
 
+    # install any packages that the repo says we need as dependencies.
+    pkgs = required_packages()
+    if pkgs:
+        opts = []
+        if config('force-package-install'):
+            opts = [
+                '--option', 'Dpkg::Options::=--force-confnew',
+                '--option', 'Dpkg::Options::=--force-confdef',
+            ]
+        apt_install(pkgs, options=opts, fatal=True)
+
     log("*** Updating jenkins.")
     if not is_jenkins_slave():
         log('Running on master, updating config and jobs.')
@@ -326,17 +337,6 @@ def update_jenkins():
         cmd = ["run-parts", "--exit-on-error", setupd]
         log('Running repo setup.')
         subprocess.check_call(cmd)
-
-    # install any packages that the repo says we need as dependencies.
-    pkgs = required_packages()
-    if pkgs:
-        opts = []
-        if config('force-package-install'):
-            opts = [
-                '--option', 'Dpkg::Options::=--force-confnew',
-                '--option', 'Dpkg::Options::=--force-confdef',
-            ]
-        apt_install(pkgs, options=opts, fatal=True)
 
 
 def required_packages():
